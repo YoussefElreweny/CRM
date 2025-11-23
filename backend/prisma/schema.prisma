@@ -1,0 +1,138 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS (Fixed Options) ---
+
+enum Role {
+  ADMIN
+  CLIENT
+  QA
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  PAUSED
+}
+
+enum CallOutcome {
+  PENDING
+  QUALIFIED
+  FOLLOW_UP
+  NO_ANSWER
+  NOT_INTERESTED
+  VOICEMAIL
+  ERROR
+}
+
+// --- MODELS (Tables) ---
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  client    Client?
+  qaOverrides QAOverride[]
+}
+
+model Client {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  companyName String
+  
+  contacts    Contact[]
+  campaigns   Campaign[]
+}
+
+model Contact {
+  id            String   @id @default(uuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
+  name          String
+  phone         String
+  neighborhood  String?
+  customFields  Json?    // Stores flexible data like { "pet": "dog" }
+  isDeleted     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  campaignContacts CampaignContact[]
+  calls            Call[]
+}
+
+model Campaign {
+  id          String   @id @default(uuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      CampaignStatus @default(DRAFT)
+  createdAt   DateTime @default(now())
+
+  campaignContacts CampaignContact[]
+  calls            Call[]
+}
+
+// Join Table (Many-to-Many): One campaign has many contacts
+model CampaignContact {
+  id          String   @id @default(uuid())
+  campaignId  String
+  contactId   String
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  contact     Contact  @relation(fields: [contactId], references: [id])
+  assignedAt  DateTime @default(now())
+
+  @@unique([campaignId, contactId]) // Prevents adding same contact to same campaign twice
+}
+
+model Call {
+  id                  String      @id @default(uuid())
+  campaignId          String
+  contactId           String
+  campaign            Campaign    @relation(fields: [campaignId], references: [id])
+  contact             Contact     @relation(fields: [contactId], references: [id])
+  
+  attemptNumber       Int         @default(1)
+  ai_notes            String?
+  transcript_text     String?     // Can be very long text
+  audio_url           String?
+  
+  ai_classification   CallOutcome @default(PENDING)
+  qa_classification   CallOutcome?
+  final_classification CallOutcome @default(PENDING) 
+  
+  confidence_score    Float?
+  call_time           DateTime?
+  createdAt           DateTime    @default(now())
+
+  qaOverrides         QAOverride[]
+}
+
+model QAOverride {
+  id                String      @id @default(uuid())
+  qaUserId          String
+  user              User        @relation(fields: [qaUserId], references: [id])
+  callId            String
+  call              Call        @relation(fields: [callId], references: [id])
+  oldClassification CallOutcome
+  newClassification CallOutcome
+  feedbackNotes     String?
+  createdAt         DateTime    @default(now())
+}

@@ -1,0 +1,28 @@
+### 1. Register a New User
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "password": "securePassword123",
+    "companyName": "Tech Corp",
+    "role": "CLIENT"
+}
+
+### 2. Login (Get Token)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "securePassword123"
+}
+
+### 3. Try to get Secret WITHOUT Token (Should Fail)
+GET http://localhost:3000/api/secret
+
+### 4. Try to get Secret WITH Token
+# (Replace 'YOUR_LONG_TOKEN_HERE' with the real token you got from Login step #2)
+GET http://localhost:3000/api/secret
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZkYThjNmRhLTUwYzctNGNkYi04ZGRiLTdhODljOTliNTA4YSIsImlhdCI6MTc2MzkxMjEyNywiZXhwIjoxNzcxNjg4MTI3fQ.REmP4vCbfmQle8D3BZh3JPwybGHh9-KeAY3XInd7Z-U
