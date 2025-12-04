@@ -1,12 +1,12 @@
 
-import type { Campaign, Client, SystemLog, CallToReview } from '../types';
+import { Campaign, Client, SystemLog, CallToReview } from '../types';
 
 export const mockCampaigns: Campaign[] = [
-  { id: 'c1', name: 'Q4 Lead Generation', status: 'Active', dateCreated: '2023-10-01', successRate: 85, client: 'Acme Corp' },
-  { id: 'c2', name: 'New Product Launch', status: 'Completed', dateCreated: '2023-09-15', successRate: 92, client: 'Globex Inc.' },
-  { id: 'c3', name: 'Customer Feedback Outreach', status: 'Active', dateCreated: '2023-10-05', successRate: 78, client: 'Stark Industries' },
-  { id: 'c4', name: 'Holiday Promotions', status: 'Paused', dateCreated: '2023-09-28', successRate: 0, client: 'Acme Corp' },
-  { id: 'c5', name: 'Website Visitors Follow-up', status: 'Draft', dateCreated: '2023-10-10', successRate: 0, client: 'Wayne Enterprises' },
+    { id: 'c1', name: 'Q4 Lead Generation', status: 'Active', dateCreated: '2023-10-01', successRate: 85, client: 'Acme Corp' },
+    { id: 'c2', name: 'New Product Launch', status: 'Completed', dateCreated: '2023-09-15', successRate: 92, client: 'Globex Inc.' },
+    { id: 'c3', name: 'Customer Feedback Outreach', status: 'Active', dateCreated: '2023-10-05', successRate: 78, client: 'Stark Industries' },
+    { id: 'c4', name: 'Holiday Promotions', status: 'Paused', dateCreated: '2023-09-28', successRate: 0, client: 'Acme Corp' },
+    { id: 'c5', name: 'Website Visitors Follow-up', status: 'Draft', dateCreated: '2023-10-10', successRate: 0, client: 'Wayne Enterprises' },
 ];
 
 export const mockClientCampaigns: Campaign[] = mockCampaigns.filter(c => c.client === 'Acme Corp');

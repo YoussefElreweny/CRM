@@ -1,5 +1,9 @@
 
-export type UserRole = 'Client' | 'Admin' | 'QA Team';
+export enum UserRole {
+  Client = 'Client',
+  Admin = 'Admin',
+  QA = 'QA Team',
+}
 
 export interface User {
   name: string;
@@ -18,25 +22,25 @@ export interface Campaign {
 }
 
 export interface Client {
-    id: string;
-    companyName: string;
-    email: string;
-    status: 'Active' | 'Suspended';
-    createdDate: string;
+  id: string;
+  companyName: string;
+  email: string;
+  status: 'Active' | 'Suspended';
+  createdDate: string;
 }
 
 export interface SystemLog {
-    id: string;
-    timestamp: string;
-    event: string;
-    type: 'Info' | 'Warning' | 'Error';
+  id: string;
+  timestamp: string;
+  event: string;
+  type: 'Info' | 'Warning' | 'Error';
 }
 
 export interface CallToReview {
-    id: string;
-    date: string;
-    campaign: string;
-    aiClassification: string;
-    humanReview: string | null;
-    status: 'Pending' | 'Corrected' | 'Verified';
+  id: string;
+  date: string;
+  campaign: string;
+  aiClassification: string;
+  humanReview: string | null;
+  status: 'Pending' | 'Corrected' | 'Verified';
 }
