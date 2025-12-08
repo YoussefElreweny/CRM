@@ -16,17 +16,35 @@ export interface Campaign {
   id: string;
   name: string;
   status: 'Active' | 'Paused' | 'Completed' | 'Draft';
-  dateCreated: string;
+  createdAt: string;
   successRate: number;
-  client?: string;
+  client?: {
+    companyName: string;
+    user: {
+      email: string;
+    };
+  };
+  _count?: {
+    calls: number;
+    campaignContacts: number;
+  };
 }
 
 export interface Client {
   id: string;
   companyName: string;
-  email: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+  };
   status: 'Active' | 'Suspended';
   createdDate: string;
+  _count?: {
+    campaigns: number;
+    contacts: number;
+  };
 }
 
 export interface SystemLog {

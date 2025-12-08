@@ -10,6 +10,9 @@ const signToken = (id: string) => {
   });
 };
 
+// Hardcoded Admin Emails
+const ADMIN_EMAILS = ['admin@crm.com', 'youssef@crm.com'];
+
 export const registerUser = async (data: any) => {
   const { name, email, password, companyName } = data;
 
@@ -22,7 +25,10 @@ export const registerUser = async (data: any) => {
   // 2. Hash Password
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  // 3. Transaction: Create User AND Client Profile together
+  // 3. Determine Role
+  const role = ADMIN_EMAILS.includes(email) ? 'ADMIN' : 'CLIENT';
+
+  // 4. Transaction: Create User (and Client Profile if role is CLIENT)
   const newUser = await prisma.$transaction(async (tx) => {
     // A. Create User
     const user = await tx.user.create({
@@ -30,24 +36,26 @@ export const registerUser = async (data: any) => {
         name,
         email,
         password: hashedPassword,
-        role: 'CLIENT', // Default registration is always Client
+        role: role as any, // Cast to match Enum if needed
       },
     });
 
-    // B. Create Client Profile
-    await tx.client.create({
-      data: {
-        userId: user.id,
-        companyName: companyName || `${name}'s Company`,
-      },
-    });
+    // B. Create Client Profile (Only for Clients)
+    if (role === 'CLIENT') {
+      await tx.client.create({
+        data: {
+          userId: user.id,
+          companyName: companyName || `${name}'s Company`,
+        },
+      });
+    }
 
     return user;
   });
 
   // 4. Generate Token
   const token = signToken(newUser.id);
-  
+
   // Return user without password
   const { password: _, ...userWithoutPassword } = newUser;
   return { user: userWithoutPassword, token };

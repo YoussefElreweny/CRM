@@ -1,34 +1,38 @@
 
 import React from 'react';
-import { ResponsiveContainer, LineChart, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, Bar } from 'recharts';
-import { mockPerformanceData } from '../../services/mockData';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ChartComponentProps {
     type: 'line' | 'bar';
     dataKey: string;
     title: string;
+    data?: any[]; // Accept data via props
 }
 
-const ChartComponent: React.FC<ChartComponentProps> = ({ type, dataKey, title }) => {
+const ChartComponent: React.FC<ChartComponentProps> = ({ type, dataKey, title, data = [] }) => {
     const Chart = type === 'line' ? LineChart : BarChart;
-    const ChartElement = type === 'line' ? Line : Bar;
+    const DataComponent = type === 'line' ? Line : Bar;
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-md h-96">
+        <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">{title}</h3>
-            <ResponsiveContainer width="100%" height="90%">
-                <Chart data={mockPerformanceData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="name" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
-                    <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}/>
-                    <Legend />
-                    <ChartElement type="monotone" dataKey={dataKey} fill="#4f46e5" stroke="#4f46e5" />
-                </Chart>
-            </ResponsiveContainer>
+            {data.length === 0 ? (
+                <div className="flex items-center justify-center h-64 text-gray-500">
+                    No data available
+                </div>
+            ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                    <Chart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <DataComponent type="monotone" dataKey={dataKey} stroke="#4F46E5" fill="#4F46E5" />
+                    </Chart>
+                </ResponsiveContainer>
+            )}
         </div>
     );
 };
-
 
 export default ChartComponent;

@@ -11,8 +11,10 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   return <span className={`${baseClasses} ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`}>{status}</span>;
 }
 
+import { Client } from '../../../types';
+
 const AdminClients: React.FC = () => {
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

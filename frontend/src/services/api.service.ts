@@ -57,4 +57,17 @@ apiClient.interceptors.response.use(
     }
 );
 
+export const submitContactForm = async (data: { firstName: string; lastName: string; email: string; subject: string; message: string }) => {
+    return apiClient.post('/api/contact', data);
+};
+
+export const getInquiries = async () => {
+    const response = await apiClient.get('/api/contact');
+    return response.data.data.inquiries;
+};
+
+export const deleteInquiry = async (id: string) => {
+    await apiClient.delete(`/api/contact/${id}`);
+};
+
 export default apiClient;

@@ -5,8 +5,8 @@ import * as contactService from './service';
 
 // Add 'file' to Request type
 interface MulterRequest extends Request {
-    file?: any; // We use 'any' or express.Multer.File if types installed
-    user?: any;
+    file?: any;
+    user?: any; // populated by auth middleware
 }
 
 export const uploadContacts = catchAsync(async (req: MulterRequest, res: Response, next: NextFunction) => {
@@ -16,7 +16,7 @@ export const uploadContacts = catchAsync(async (req: MulterRequest, res: Respons
     }
 
     // 2. Identify the logged-in Client
-    const clientId = req.user?.client?.id; 
+    const clientId = req.user?.client?.id;
     if (!clientId) {
         // Should verify your /login created a Client! (We'll check this)
         return next(new AppError('No client profile found for this user', 403));

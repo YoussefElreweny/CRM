@@ -15,7 +15,7 @@ const StatusBadge: React.FC<{ status: Campaign['status'] }> = ({ status }) => {
 }
 
 const ClientCampaigns: React.FC = () => {
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

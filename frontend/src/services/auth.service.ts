@@ -2,7 +2,7 @@ import apiClient from './api.service';
 import { User, UserRole } from '../types';
 
 // API Response Types
-export interface AuthResponse {
+interface AuthResponse {
     status: string;
     data: {
         user: {
@@ -12,6 +12,7 @@ export interface AuthResponse {
             role: string;
             createdAt: string;
             updatedAt: string;
+            companyName?: string;
         };
         token: string;
     };
@@ -46,7 +47,6 @@ const mapBackendRole = (backendRole: string): UserRole => {
 // Register new user
 export const register = async (data: RegisterData): Promise<User> => {
     const response = await apiClient.post<AuthResponse>('/auth/register', data);
-
     const { user, token } = response.data.data;
 
     // Store token in localStorage
@@ -57,7 +57,7 @@ export const register = async (data: RegisterData): Promise<User> => {
         name: user.name,
         email: user.email,
         role: mapBackendRole(user.role),
-        companyName: data.companyName,
+        companyName: user.companyName,
     };
 
     // Store user in localStorage
@@ -69,7 +69,6 @@ export const register = async (data: RegisterData): Promise<User> => {
 // Login existing user
 export const login = async (data: LoginData): Promise<User> => {
     const response = await apiClient.post<AuthResponse>('/auth/login', data);
-
     const { user, token } = response.data.data;
 
     // Store token in localStorage
@@ -80,6 +79,7 @@ export const login = async (data: LoginData): Promise<User> => {
         name: user.name,
         email: user.email,
         role: mapBackendRole(user.role),
+        companyName: user.companyName,
     };
 
     // Store user in localStorage
@@ -92,6 +92,7 @@ export const login = async (data: LoginData): Promise<User> => {
 export const logout = (): void => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    window.location.href = '/login';
 };
 
 // Get current user from localStorage

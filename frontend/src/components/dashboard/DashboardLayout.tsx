@@ -15,6 +15,7 @@ import AdminClients from './admin/AdminClients';
 import AdminCampaigns from './admin/AdminCampaigns';
 import AdminSystemMonitoring from './admin/AdminSystemMonitoring';
 import AdminModelReports from './admin/AdminModelReports';
+import AdminInquiries from './admin/AdminInquiries';
 
 import QADashboard from './qa/QADashboard';
 import QAReviewCalls from './qa/QAReviewCalls';
@@ -25,10 +26,12 @@ interface DashboardLayoutProps {
   onLogout: () => void;
 }
 
+import ClientContacts from './client/ClientContacts';
+
 const clientPages = {
   'Dashboard': <ClientDashboard />,
   'Campaigns': <ClientCampaigns />,
-  'Upload Contacts': <ClientCreateCampaign />,
+  'Upload Contacts': <ClientContacts />,
   'Analytics': <ClientAnalytics />,
   'Settings': <ClientSettings />,
 };
@@ -39,6 +42,7 @@ const adminPages = {
   'Campaigns': <AdminCampaigns />,
   'System Monitoring': <AdminSystemMonitoring />,
   'AI Model Reports': <AdminModelReports />,
+  'Inquiries': <AdminInquiries />,
 };
 
 const qaPages = {
@@ -71,7 +75,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, onLogout }) => 
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar user={user} onLogout={onLogout} onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 sm:p-6 lg:p-8">
-            {availablePages[activePage as keyof typeof availablePages] || <div>Page not found</div>}
+          {availablePages[activePage as keyof typeof availablePages] || <div>Page not found</div>}
         </main>
       </div>
     </div>

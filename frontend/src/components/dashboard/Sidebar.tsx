@@ -25,6 +25,7 @@ const navLinks = {
     { name: 'Campaigns', icon: ICONS.campaigns },
     { name: 'System Monitoring', icon: ICONS.monitoring },
     { name: 'AI Model Reports', icon: ICONS.aiReports },
+    { name: 'Inquiries', icon: ICONS.reports }, // Reusing reports icon for now
   ],
   [UserRole.QA]: [
     { name: 'Dashboard', icon: ICONS.dashboard },
@@ -38,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole, activePage, setActivePage, 
 
   const handleNavigation = (page: string) => {
     setActivePage(page);
-    if(window.innerWidth < 768) {
+    if (window.innerWidth < 768) {
       setIsOpen(false);
     }
   }
@@ -49,9 +50,9 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole, activePage, setActivePage, 
       <aside className={`fixed top-0 left-0 z-30 h-full w-64 bg-gray-800 text-white flex flex-col transition-transform transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <span className="text-xl font-bold">{APP_NAME}</span>
-           <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-400 hover:text-white">
-             {ICONS.close}
-           </button>
+          <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-400 hover:text-white">
+            {ICONS.close}
+          </button>
         </div>
         <nav className="flex-1 px-2 py-4 space-y-2">
           {links.map((link) => (
@@ -62,11 +63,10 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole, activePage, setActivePage, 
                 e.preventDefault();
                 handleNavigation(link.name);
               }}
-              className={`flex items-center px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                activePage === link.name
+              className={`flex items-center px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activePage === link.name
                   ? 'bg-indigo-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
+                }`}
             >
               <span className="mr-3">{link.icon}</span>
               {link.name}
