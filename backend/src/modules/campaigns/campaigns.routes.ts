@@ -11,7 +11,7 @@ router.use(protect);
 router
     .route('/')
     .get(campaignsController.getAllCampaigns)
-    .post(restrictTo('CLIENT'), campaignsController.createCampaign);
+    .post(restrictTo('CLIENT'), require('../../middleware/upload.middleware').upload.single('file'), campaignsController.createCampaign);
 
 router
     .route('/:id')

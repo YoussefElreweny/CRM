@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../config/prisma';
 
 // Get dashboard statistics for CLIENT role
 export const getDashboardStats = async (clientId: string) => {
@@ -70,60 +68,37 @@ export const getDashboardStats = async (clientId: string) => {
 
 // Get performance data over time (for charts)
 export const getPerformanceData = async (clientId: string) => {
-    // Get campaigns with their call statistics grouped by month
-    const campaigns = await prisma.campaign.findMany({
-        where: { clientId },
-        include: {
-            calls: {
-                select: {
-                    final_classification: true,
-                    createdAt: true
-                }
-            }
-        },
-        orderBy: { createdAt: 'asc' }
+    // We want data for the last 7 months
+    // Efficient aggregation using groupBy is tricky with "by month" in Prisma without raw SQL for dates
+    // But we can approximate or use raw SQL which is cleaner for time-series aggregation
+
+    const stats = await prisma.$queryRaw<Array<{
+        month_year: string,
+        total_calls: bigint,
+        successful_calls: bigint
+    }>>`
+        SELECT 
+            TO_CHAR(c."createdAt", 'Mon YYYY') as month_year,
+            COUNT(*)::int as total_calls,
+            COUNT(CASE WHEN c.final_classification IN ('QUALIFIED', 'FOLLOW_UP') THEN 1 END)::int as successful_calls
+        FROM "Call" c
+        JOIN "Campaign" camp ON c."campaignId" = camp.id
+        WHERE camp."clientId" = ${clientId}
+        AND c."createdAt" >= NOW() - INTERVAL '7 months'
+        GROUP BY TO_CHAR(c."createdAt", 'Mon YYYY'), DATE_TRUNC('month', c."createdAt")
+        ORDER BY DATE_TRUNC('month', c."createdAt") ASC
+    `;
+
+    return stats.map(stat => {
+        const total = Number(stat.total_calls);
+        const successful = Number(stat.successful_calls);
+
+        return {
+            name: stat.month_year,
+            successRate: total > 0 ? Math.round((successful / total) * 100) : 0,
+            engagement: total > 0 ? Math.round((successful / total) * 85) : 0 // Simplified metric
+        };
     });
-
-    // Group by month
-    const monthlyData: { [key: string]: { successRate: number; engagement: number; totalCalls: number; successfulCalls: number } } = {};
-
-    campaigns.forEach(campaign => {
-        campaign.calls.forEach(call => {
-            const monthYear = new Date(call.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                year: 'numeric'
-            });
-
-            if (!monthlyData[monthYear]) {
-                monthlyData[monthYear] = {
-                    successRate: 0,
-                    engagement: 0,
-                    totalCalls: 0,
-                    successfulCalls: 0
-                };
-            }
-
-            monthlyData[monthYear].totalCalls++;
-
-            if (['QUALIFIED', 'FOLLOW_UP'].includes(call.final_classification)) {
-                monthlyData[monthYear].successfulCalls++;
-            }
-        });
-    });
-
-    // Calculate rates for each month
-    const performanceData = Object.entries(monthlyData).map(([name, data]) => ({
-        name,
-        successRate: data.totalCalls > 0
-            ? Math.round((data.successfulCalls / data.totalCalls) * 100)
-            : 0,
-        engagement: data.totalCalls > 0
-            ? Math.round((data.successfulCalls / data.totalCalls) * 85) // Engagement as percentage of success
-            : 0
-    }));
-
-    // Return last 7 months or available data
-    return performanceData.slice(-7);
 };
 
 // Get recent campaigns for CLIENT

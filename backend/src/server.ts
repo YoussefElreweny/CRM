@@ -17,6 +17,7 @@ import analyticsRoutes from './modules/analytics/analytics.routes';
 import callsRoutes from './modules/calls/calls.routes';
 import systemRoutes from './modules/system/system.routes';
 import publicContactRoutes from './modules/public/contact.routes';
+import aiRoutes from './modules/ai/ai.routes';
 import { globalErrorHandler } from './middleware/error.middleware';
 import { AppError } from './utils/AppError';
 import { protect, restrictTo } from './middleware/auth.middleware';
@@ -47,6 +48,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/calls', callsRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/contact', publicContactRoutes); // Public contact form
+app.use('/api/ai', aiRoutes); // AI endpoints (for simulator/external AI)
 
 // 2. Protected Routes (Token Required)
 // Clients only can access /contacts

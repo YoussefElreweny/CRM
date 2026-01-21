@@ -9,9 +9,12 @@ export interface Contact {
     createdAt: string;
 }
 
-export const uploadContacts = async (file: File): Promise<{ count: number; message: string }> => {
+export const uploadContacts = async (file: File, campaignId?: string): Promise<{ count: number; message: string }> => {
     const formData = new FormData();
     formData.append('file', file);
+    if (campaignId) {
+        formData.append('campaignId', campaignId);
+    }
 
     const response = await apiClient.post('/contacts/upload', formData, {
         headers: {

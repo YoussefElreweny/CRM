@@ -33,8 +33,20 @@ export const getCampaign = catchAsync(async (req: Request, res: Response, next: 
 // Create new campaign
 export const createCampaign = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = (req as any).user.id;
+    let campaignData = { ...req.body };
 
-    const campaign = await campaignsService.createCampaign(userId, req.body);
+    // Parse details if it comes as a JSON string (from FormData)
+    if (typeof campaignData.details === 'string') {
+        try {
+            campaignData.details = JSON.parse(campaignData.details);
+        } catch (e) {
+            // keep as string or handle error
+        }
+    }
+
+    const file = req.file;
+
+    const campaign = await campaignsService.createCampaign(userId, campaignData, file?.path);
 
     res.status(201).json({
         status: 'success',

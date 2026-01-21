@@ -74,6 +74,8 @@ model Contact {
 
   campaignContacts CampaignContact[]
   calls            Call[]
+
+  @@index([clientId])
 }
 
 model Campaign {
@@ -84,11 +86,15 @@ model Campaign {
   description String?
   startDate   DateTime?
   endDate     DateTime?
+  details     Json?
   status      CampaignStatus @default(DRAFT)
   createdAt   DateTime @default(now())
 
   campaignContacts CampaignContact[]
   calls            Call[]
+
+  @@index([clientId])
+  @@index([status])
 }
 
 // Join Table (Many-to-Many): One campaign has many contacts
@@ -101,6 +107,8 @@ model CampaignContact {
   assignedAt  DateTime @default(now())
 
   @@unique([campaignId, contactId]) // Prevents adding same contact to same campaign twice
+  @@index([campaignId])
+  @@index([contactId])
 }
 
 model Call {
@@ -124,6 +132,11 @@ model Call {
   createdAt           DateTime    @default(now())
 
   qaOverrides         QAOverride[]
+
+  @@index([campaignId])
+  @@index([contactId])
+  @@index([final_classification])
+  @@index([createdAt])
 }
 
 model QAOverride {
@@ -136,6 +149,8 @@ model QAOverride {
   newClassification CallOutcome
   feedbackNotes     String?
   createdAt         DateTime    @default(now())
+
+  @@index([callId])
 }
 
 model ContactInquiry {

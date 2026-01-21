@@ -6,10 +6,10 @@ import { Campaign } from '../../../types';
 const StatusBadge: React.FC<{ status: Campaign['status'] }> = ({ status }) => {
   const baseClasses = "px-3 py-1 text-xs font-semibold rounded-full inline-block";
   const statusClasses = {
-    'Active': 'bg-green-100 text-green-800',
-    'Completed': 'bg-blue-100 text-blue-800',
-    'Paused': 'bg-yellow-100 text-yellow-800',
-    'Draft': 'bg-gray-100 text-gray-800'
+    'ACTIVE': 'bg-green-100 text-green-800',
+    'COMPLETED': 'bg-blue-100 text-blue-800',
+    'PAUSED': 'bg-yellow-100 text-yellow-800',
+    'DRAFT': 'bg-gray-100 text-gray-800'
   };
   return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 }

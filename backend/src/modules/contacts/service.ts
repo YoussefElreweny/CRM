@@ -4,7 +4,7 @@ import prisma from '../../config/prisma';
 import { AppError } from '../../utils/AppError';
 
 
-export const parseAndSaveContacts = async (filePath: string, clientId: string) => {
+export const parseAndSaveContacts = async (filePath: string, clientId: string, campaignId?: string) => {
   const contacts: any[] = [];
 
   return new Promise((resolve, reject) => {
@@ -38,16 +38,46 @@ export const parseAndSaveContacts = async (filePath: string, clientId: string) =
             skipDuplicates: true, // Don't crash if duplicate ID
           });
 
+          // If campaignId is provided, we need to link these contacts.
+          // Problem: createMany doesn't return IDs easily in generic SQL.
+          // Since we pushed simple `createMany` for speed, we might not know WHO was just created without querying again.
+          // However, assuming contacts have unique phone+clientId constraint.
+
+          if (campaignId) {
+            // Fetch contacts we just likely added (or all contacts in the file) to link them.
+            // This can be heavy. A better way for immediate linking is loop create, OR upsert logic.
+            // Given the requirements and typical CSV size (small/medium), loop create is safer for linking.
+            // But let's try to be efficient: Find contacts by phone numbers in the batch.
+            const phones = contacts.map(c => c.phone);
+            const createdContacts = await prisma.contact.findMany({
+              where: {
+                clientId,
+                phone: { in: phones }
+              },
+              select: { id: true }
+            });
+
+            const campaignContacts = createdContacts.map(c => ({
+              campaignId,
+              contactId: c.id
+            }));
+
+            await prisma.campaignContact.createMany({
+              data: campaignContacts,
+              skipDuplicates: true
+            });
+          }
+
           // 3. Cleanup: Delete the temporary uploaded file from the server
           fs.unlinkSync(filePath);
 
-          resolve({ count: result.count, message: 'Import successful' });
+          resolve({ count: result.count, message: 'Import successful' + (campaignId ? ' and linked to campaign' : '') });
         } catch (error) {
           fs.unlinkSync(filePath); // Ensure deletion on error
           reject(error);
         }
       })
-      .on('error', (error:any) => {
+      .on('error', (error: any) => {
         fs.unlinkSync(filePath);
         reject(error);
       });

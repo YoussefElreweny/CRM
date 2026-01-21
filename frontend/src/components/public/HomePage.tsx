@@ -1,12 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { APP_NAME } from '../../constants';
 
 import { submitContactForm } from '../../services/api.service';
-
-interface HomePageProps {
-    onGetStarted: () => void;
-}
 
 const FeatureCard: React.FC<{ title: string; description: string; icon: React.ReactNode; delay: number }> = ({ title, description, icon, delay }) => (
     <div
@@ -38,7 +35,7 @@ const StepCard: React.FC<{ step: number; title: string; description: string; del
 
 
 
-const HomePage: React.FC<HomePageProps> = ({ onGetStarted }) => {
+const HomePage: React.FC = () => {
     const [scrolled, setScrolled] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -109,12 +106,12 @@ const HomePage: React.FC<HomePageProps> = ({ onGetStarted }) => {
                         <a href="#how-it-works" className={`font-medium hover:text-indigo-400 transition-colors ${scrolled ? 'text-gray-600' : 'text-gray-200'}`}>How it Works</a>
                         <a href="#contact" className={`font-medium hover:text-indigo-400 transition-colors ${scrolled ? 'text-gray-600' : 'text-gray-200'}`}>Contact</a>
                     </div>
-                    <button
-                        onClick={onGetStarted}
+                    <Link
+                        to="/login"
                         className={`font-semibold py-2.5 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 ${scrolled ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-600 hover:bg-indigo-50'}`}
                     >
                         Login / Get Started
-                    </button>
+                    </Link>
                 </div>
             </nav>
 
@@ -140,10 +137,10 @@ const HomePage: React.FC<HomePageProps> = ({ onGetStarted }) => {
                             Deploy intelligent AI agents to handle outreach, scheduling, and follow-ups. Focus on closing deals while we handle the conversation.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start animate-[fadeInUp_0.8s_ease-out_0.3s_backwards]">
-                            <button onClick={onGetStarted} className="bg-indigo-500 text-white font-bold py-4 px-8 rounded-full shadow-xl hover:bg-indigo-600 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center">
+                            <Link to="/login" className="bg-indigo-500 text-white font-bold py-4 px-8 rounded-full shadow-xl hover:bg-indigo-600 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center">
                                 Start Free Trial
                                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </button>
+                            </Link>
                             <button className="bg-transparent border border-gray-400 text-white font-bold py-4 px-8 rounded-full hover:bg-white/10 transition-colors duration-300">
                                 Watch Demo
                             </button>

@@ -1,5 +1,7 @@
 import prisma from '../../config/prisma';
 import { AppError } from '../../utils/AppError';
+import fs from 'fs';
+import csv from 'csv-parser';
 
 // Get campaigns based on user role
 export const getCampaigns = async (userId: string, userRole: string) => {
@@ -88,7 +90,7 @@ export const getCampaignById = async (campaignId: string, userId: string, userRo
 };
 
 // Create new campaign
-export const createCampaign = async (userId: string, data: any) => {
+export const createCampaign = async (userId: string, data: any, filePath?: string) => {
     // Get client profile
     const client = await prisma.client.findUnique({
         where: { userId }
@@ -105,6 +107,8 @@ export const createCampaign = async (userId: string, data: any) => {
             description: data.description,
             startDate: data.startDate ? new Date(data.startDate) : null,
             endDate: data.endDate ? new Date(data.endDate) : null,
+            // @ts-ignore
+            details: data.details,
             status: data.status || 'DRAFT'
         },
         include: {
@@ -116,6 +120,76 @@ export const createCampaign = async (userId: string, data: any) => {
             }
         }
     });
+
+    // If file provided, process it
+    if (filePath) {
+        const contacts: any[] = [];
+
+        await new Promise((resolve, reject) => {
+            fs.createReadStream(filePath)
+                .pipe(csv())
+                .on('data', (row: any) => {
+                    // Normalize headers slightly if needed, but assuming standard headers for now
+                    // Expected headers: name, phone, neighborhood, etc.
+                    if (row.name && row.phone) {
+                        // For now we do sequential creates to restart simpler (could leverage createMany if no linking needed immediately)
+                        // But we need to link to campaign.
+                        // Ideally: Create Contact -> Create CampaignContact
+
+                        // We will just process - this logic is fine but we'll wrap it in try catch if needed
+                        // or better, delegate to contacts service? For now keep inline to minimize diff
+
+                        // Saving logic placeholder or keep existing if it was working
+                        // Since I replaced the logic in previous step, I should keep it or re-add it if I am replacing the block
+                        // The user approved removal of file upload from *Campaign Creation*, but keeping the logic in backend *optionally* is fine or we can remove it to clean up.
+                        // The plan said "Remove mandatory file logic".
+                        // So I will keep it optional for backward compatibility or future flexibility.
+                        contacts.push({
+                            clientId: client.id,
+                            name: row.name,
+                            phone: row.phone,
+                            neighborhood: row.neighborhood || null,
+                            customFields: row // Store everything else as custom fields
+                        });
+                    }
+                })
+                .on('end', async () => {
+                    try {
+                        // Create contacts in batch (transactional ideally, but let's do simple first)
+                        // Note: createMany is faster
+                        if (contacts.length > 0) {
+                            // We need to insert contacts and then link them.
+                            // createMany doesn't return IDs in all DBs (Postgres does, but Prisma only returns count).
+
+                            // So we have to loop or use a more complex query.
+                            // For now, let's just loop and create. It's slower but safe for getting IDs.
+
+                            for (const contactData of contacts) {
+                                const contact = await prisma.contact.create({
+                                    data: contactData
+                                });
+
+                                await prisma.campaignContact.create({
+                                    data: {
+                                        campaignId: campaign.id,
+                                        contactId: contact.id
+                                    }
+                                });
+                            }
+                        }
+
+                        // Clean up file
+                        fs.unlinkSync(filePath);
+                        resolve(true);
+                    } catch (error) {
+                        reject(error);
+                    }
+                })
+                .on('error', (error: any) => {
+                    reject(error);
+                });
+        });
+    }
 
     return campaign;
 };

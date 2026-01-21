@@ -23,7 +23,11 @@ export const uploadContacts = catchAsync(async (req: MulterRequest, res: Respons
     }
 
     // 3. Process the file
-    const result = await contactService.parseAndSaveContacts(req.file.path, clientId);
+    // Extract campaignId from body if present
+    const campaignId = req.body.campaignId;
+
+    // Pass campaignId to service
+    const result = await contactService.parseAndSaveContacts(req.file.path, clientId, campaignId);
 
     res.status(201).json({
         status: 'success',

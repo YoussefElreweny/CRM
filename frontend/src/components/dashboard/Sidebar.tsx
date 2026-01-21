@@ -1,48 +1,39 @@
-
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { UserRole } from '../../types';
 import { APP_NAME, ICONS } from '../../constants';
 
 interface SidebarProps {
   userRole: UserRole;
-  activePage: string;
-  setActivePage: (page: string) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
 const navLinks = {
   [UserRole.Client]: [
-    { name: 'Dashboard', icon: ICONS.dashboard },
-    { name: 'Campaigns', icon: ICONS.campaigns },
-    { name: 'Upload Contacts', icon: ICONS.upload },
-    { name: 'Analytics', icon: ICONS.analytics },
-    { name: 'Settings', icon: ICONS.settings },
+    { name: 'Dashboard', path: '/dashboard', icon: ICONS.dashboard, end: true },
+    { name: 'Campaigns', path: '/dashboard/campaigns', icon: ICONS.campaigns },
+    { name: 'Upload Contacts', path: '/dashboard/contacts', icon: ICONS.upload },
+    { name: 'Analytics', path: '/dashboard/analytics', icon: ICONS.analytics },
+    { name: 'Settings', path: '/dashboard/settings', icon: ICONS.settings },
   ],
   [UserRole.Admin]: [
-    { name: 'Overview', icon: ICONS.dashboard },
-    { name: 'Clients', icon: ICONS.clients },
-    { name: 'Campaigns', icon: ICONS.campaigns },
-    { name: 'System Monitoring', icon: ICONS.monitoring },
-    { name: 'AI Model Reports', icon: ICONS.aiReports },
-    { name: 'Inquiries', icon: ICONS.reports }, // Reusing reports icon for now
+    { name: 'Overview', path: '/dashboard', icon: ICONS.dashboard, end: true },
+    { name: 'Clients', path: '/dashboard/clients', icon: ICONS.clients },
+    { name: 'Campaigns', path: '/dashboard/campaigns', icon: ICONS.campaigns },
+    { name: 'System Monitoring', path: '/dashboard/monitoring', icon: ICONS.monitoring },
+    { name: 'AI Model Reports', path: '/dashboard/reports-model', icon: ICONS.aiReports },
+    { name: 'Inquiries', path: '/dashboard/inquiries', icon: ICONS.reports },
   ],
   [UserRole.QA]: [
-    { name: 'Dashboard', icon: ICONS.dashboard },
-    { name: 'Review Calls', icon: ICONS.reviewCalls },
-    { name: 'Reports', icon: ICONS.reports },
+    { name: 'Dashboard', path: '/dashboard', icon: ICONS.dashboard, end: true },
+    { name: 'Review Calls', path: '/dashboard/reviews', icon: ICONS.reviewCalls },
+    { name: 'Reports', path: '/dashboard/reports', icon: ICONS.reports },
   ],
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ userRole, activePage, setActivePage, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ userRole, isOpen, setIsOpen }) => {
   const links = navLinks[userRole];
-
-  const handleNavigation = (page: string) => {
-    setActivePage(page);
-    if (window.innerWidth < 768) {
-      setIsOpen(false);
-    }
-  }
 
   return (
     <>
@@ -56,21 +47,21 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole, activePage, setActivePage, 
         </div>
         <nav className="flex-1 px-2 py-4 space-y-2">
           {links.map((link) => (
-            <a
+            <NavLink
               key={link.name}
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavigation(link.name);
+              to={link.path}
+              end={link.end}
+              onClick={() => {
+                if (window.innerWidth < 768) setIsOpen(false);
               }}
-              className={`flex items-center px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${activePage === link.name
+              className={({ isActive }) => `flex items-center px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive
                   ? 'bg-indigo-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
             >
               <span className="mr-3">{link.icon}</span>
               {link.name}
-            </a>
+            </NavLink>
           ))}
         </nav>
       </aside>

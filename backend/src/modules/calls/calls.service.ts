@@ -1,6 +1,5 @@
-import { PrismaClient, CallOutcome } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../config/prisma';
+import { CallOutcome } from '@prisma/client';
 
 // Get calls pending QA review
 export const getCallsToReview = async (limit: number = 50) => {

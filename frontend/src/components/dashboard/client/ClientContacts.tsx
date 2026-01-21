@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import * as campaignsService from '../../../services/campaigns.service';
 import * as contactsService from '../../../services/contacts.service';
+import { Campaign } from '../../../types';
 
 const ClientContacts: React.FC = () => {
     const [contacts, setContacts] = useState<contactsService.Contact[]>([]);
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
@@ -11,6 +15,7 @@ const ClientContacts: React.FC = () => {
 
     useEffect(() => {
         fetchContacts();
+        fetchCampaigns();
     }, []);
 
     const fetchContacts = async () => {
@@ -22,6 +27,15 @@ const ClientContacts: React.FC = () => {
             setError(err instanceof Error ? err.message : 'Failed to load contacts');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchCampaigns = async () => {
+        try {
+            const data = await campaignsService.getCampaigns();
+            setCampaigns(data);
+        } catch (err) {
+            console.error('Failed to load campaigns for selector', err);
         }
     };
 
@@ -43,9 +57,10 @@ const ClientContacts: React.FC = () => {
         try {
             setUploading(true);
             setError('');
-            const result = await contactsService.uploadContacts(file);
+            const result = await contactsService.uploadContacts(file, selectedCampaignId);
             setSuccessMessage(result.message);
             setFile(null);
+            setSelectedCampaignId(''); // Reset selection
             // Reset file input
             const fileInput = document.getElementById('file-upload') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
@@ -70,32 +85,56 @@ const ClientContacts: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-4">Upload Contacts</h2>
                 <p className="text-gray-600 mb-4">Upload a CSV file with columns: <code>name, phone</code> (optional: <code>neighborhood</code>)</p>
 
-                <form onSubmit={handleUpload} className="flex items-end space-x-4">
-                    <div className="flex-1">
-                        <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-1">
-                            CSV File
-                        </label>
-                        <input
-                            id="file-upload"
-                            type="file"
-                            accept=".csv"
-                            onChange={handleFileChange}
-                            className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-indigo-50 file:text-indigo-700
-                hover:file:bg-indigo-100"
-                        />
+                <form onSubmit={handleUpload} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="campaign-select" className="block text-sm font-medium text-gray-700 mb-1">
+                                Assign to Campaign (Optional)
+                            </label>
+                            <select
+                                id="campaign-select"
+                                value={selectedCampaignId}
+                                onChange={(e) => setSelectedCampaignId(e.target.value)}
+                                className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
+                                <option value="">-- Select Campaign --</option>
+                                {campaigns.map(campaign => (
+                                    <option key={campaign.id} value={campaign.id}>
+                                        {campaign.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-1">
+                                CSV File
+                            </label>
+                            <input
+                                id="file-upload"
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileChange}
+                                className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-indigo-50 file:text-indigo-700
+                    hover:file:bg-indigo-100"
+                            />
+                        </div>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={!file || uploading}
-                        className={`py-2 px-4 rounded-md text-white font-bold transition-colors duration-300 ${!file || uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                            }`}
-                    >
-                        {uploading ? 'Uploading...' : 'Upload CSV'}
-                    </button>
+
+                    <div className="flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={!file || uploading}
+                            className={`py-2 px-4 rounded-md text-white font-bold transition-colors duration-300 ${!file || uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                                }`}
+                        >
+                            {uploading ? 'Uploading...' : 'Upload CSV'}
+                        </button>
+                    </div>
                 </form>
 
                 {error && <p className="mt-3 text-red-600 text-sm">{error}</p>}

@@ -13,6 +13,9 @@ const signToken = (id: string) => {
 // Hardcoded Admin Emails
 const ADMIN_EMAILS = ['admin@crm.com', 'youssef@crm.com'];
 
+// Hardcoded QA Emails
+const QA_EMAILS = ['qa@crm.com', 'qa.specialist@crm.com'];
+
 export const registerUser = async (data: any) => {
   const { name, email, password, companyName } = data;
 
@@ -26,7 +29,12 @@ export const registerUser = async (data: any) => {
   const hashedPassword = await bcrypt.hash(password, 12);
 
   // 3. Determine Role
-  const role = ADMIN_EMAILS.includes(email) ? 'ADMIN' : 'CLIENT';
+  let role = 'CLIENT';
+  if (ADMIN_EMAILS.includes(email)) {
+    role = 'ADMIN';
+  } else if (QA_EMAILS.includes(email)) {
+    role = 'QA';
+  }
 
   // 4. Transaction: Create User (and Client Profile if role is CLIENT)
   const newUser = await prisma.$transaction(async (tx) => {

@@ -1,14 +1,22 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { User } from './types';
 import HomePage from './components/public/HomePage.tsx';
 import LoginPage from './components/public/LoginPage.tsx';
 import DashboardLayout from './components/dashboard/DashboardLayout.tsx';
 import * as authService from './services/auth.service';
 
+// Protected Route Wrapper
+const ProtectedRoute = ({ children, user }: { children: React.ReactNode, user: User | null }) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on mount
@@ -19,25 +27,19 @@ const App: React.FC = () => {
     if (currentUser && token) {
       setUser(currentUser);
     }
-
     setIsLoading(false);
   }, []);
 
-  const handleLogin = useCallback((user: User) => {
+  const handleLogin = (user: User) => {
     setUser(user);
-    setShowLogin(false);
-  }, []);
+    // Navigation will be handled by the component using useNavigate or Redirect
+  };
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = () => {
     authService.logout();
     setUser(null);
-  }, []);
+  };
 
-  const handleGetStarted = useCallback(() => {
-    setShowLogin(true);
-  }, []);
-
-  // Show loading state while checking for existing session
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -49,18 +51,24 @@ const App: React.FC = () => {
     );
   }
 
-  if (user) {
-    return <DashboardLayout user={user} onLogout={handleLogout} />;
-  }
-
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {showLogin ? (
-        <LoginPage onLogin={handleLogin} />
-      ) : (
-        <HomePage onGetStarted={handleGetStarted} />
-      )}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} />} />
+
+        {/* Protected Dashboard Routes */}
+        <Route path="/dashboard/*" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout} />
+          </ProtectedRoute>
+        } />
+
+        {/* Catch all redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

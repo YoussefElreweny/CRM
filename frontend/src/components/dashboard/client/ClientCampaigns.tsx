@@ -6,13 +6,15 @@ import { Campaign } from '../../../types';
 const StatusBadge: React.FC<{ status: Campaign['status'] }> = ({ status }) => {
   const baseClasses = "px-3 py-1 text-xs font-semibold rounded-full inline-block";
   const statusClasses = {
-    'Active': 'bg-green-100 text-green-800',
-    'Completed': 'bg-blue-100 text-blue-800',
-    'Paused': 'bg-yellow-100 text-yellow-800',
-    'Draft': 'bg-gray-100 text-gray-800'
+    'ACTIVE': 'bg-green-100 text-green-800',
+    'COMPLETED': 'bg-blue-100 text-blue-800',
+    'PAUSED': 'bg-yellow-100 text-yellow-800',
+    'DRAFT': 'bg-gray-100 text-gray-800'
   };
   return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 }
+
+import { Link } from 'react-router-dom';
 
 const ClientCampaigns: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -32,6 +34,17 @@ const ClientCampaigns: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Failed to load campaigns');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLaunch = async (id: string) => {
+    if (!window.confirm('Are you sure you want to launch this campaign? It will become active immediately.')) return;
+
+    try {
+      await campaignsService.updateCampaign(id, { status: 'ACTIVE' });
+      fetchCampaigns();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to launch campaign');
     }
   };
 
@@ -66,9 +79,12 @@ const ClientCampaigns: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-800">Campaigns</h1>
-        <button className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300">
+        <Link
+          to="/dashboard/create-campaign"
+          className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300"
+        >
           Create New Campaign
-        </button>
+        </Link>
       </div>
 
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
@@ -100,6 +116,9 @@ const ClientCampaigns: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <a href="#" className="text-indigo-600 hover:text-indigo-900">View</a>
                       <a href="#" className="text-indigo-600 hover:text-indigo-900">Edit</a>
+                      {campaign.status === 'DRAFT' && (
+                        <button onClick={() => handleLaunch(campaign.id)} className="text-green-600 hover:text-green-900 font-bold">Launch</button>
+                      )}
                       <button onClick={() => handleDelete(campaign.id)} className="text-red-600 hover:text-red-900">Delete</button>
                     </td>
                   </tr>

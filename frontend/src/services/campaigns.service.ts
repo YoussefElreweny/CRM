@@ -28,8 +28,8 @@ export const createCampaign = async (data: Partial<Campaign>): Promise<Campaign>
     return response.data.data.campaign;
 };
 
-export const updateCampaign = async (id: string, data: Partial<Campaign>): Promise<Campaign> => {
-    const response = await apiClient.patch(`/api/campaigns/${id}`, data);
+export const updateCampaign = async (id: string, campaignData: Partial<Campaign>) => {
+    const response = await apiClient.put(`/api/campaigns/${id}`, campaignData);
     return response.data.data.campaign;
 };
 
