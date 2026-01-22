@@ -7,6 +7,7 @@ import TopBar from './TopBar';
 
 import ClientDashboard from './client/ClientDashboard';
 import ClientCampaigns from './client/ClientCampaigns';
+import ClientCampaignDetails from './client/ClientCampaignDetails';
 import ClientCreateCampaign from './client/ClientCreateCampaign';
 import ClientAnalytics from './client/ClientAnalytics';
 import ClientSettings from './client/ClientSettings';
@@ -44,6 +45,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, onLogout }) => 
           <Routes>
             <Route index element={<ClientDashboard />} />
             <Route path="campaigns" element={<ClientCampaigns />} />
+            <Route path="campaigns/:id" element={<ClientCampaignDetails />} />
             <Route path="create-campaign" element={<ClientCreateCampaign />} />
             <Route path="contacts" element={<ClientContacts />} />
             <Route path="analytics" element={<ClientAnalytics />} />

@@ -14,6 +14,9 @@ export interface CallToReview {
     };
     ai_classification: string;
     qa_classification: string | null;
+    ai_notes?: string;
+    transcript_text?: string;
+    audio_url?: string;
     createdAt: string;
 }
 

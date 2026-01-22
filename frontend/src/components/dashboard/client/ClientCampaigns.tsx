@@ -114,7 +114,7 @@ const ClientCampaigns: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(campaign.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{campaign._count?.campaignContacts || 0}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <a href="#" className="text-indigo-600 hover:text-indigo-900">View</a>
+                      <Link to={`/dashboard/campaigns/${campaign.id}`} className="text-indigo-600 hover:text-indigo-900">View</Link>
                       <a href="#" className="text-indigo-600 hover:text-indigo-900">Edit</a>
                       {campaign.status === 'DRAFT' && (
                         <button onClick={() => handleLaunch(campaign.id)} className="text-green-600 hover:text-green-900 font-bold">Launch</button>

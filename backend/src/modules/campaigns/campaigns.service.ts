@@ -264,3 +264,46 @@ export const getCampaignStats = async (campaignId: string, userId: string, userR
         }))
     };
 };
+
+// Get contacts for a campaign
+export const getCampaignContacts = async (campaignId: string, userId: string, userRole: string) => {
+    // Verify access first
+    await getCampaignById(campaignId, userId, userRole);
+
+    const campaignContacts = await prisma.campaignContact.findMany({
+        where: { campaignId },
+        include: {
+            contact: {
+                include: {
+                    calls: {
+                        where: { campaignId },
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                        select: {
+                            final_classification: true,
+                            createdAt: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            assignedAt: 'desc'
+        }
+    });
+
+    return campaignContacts.map(cc => {
+        const lastCall = cc.contact.calls[0];
+        return {
+            id: cc.contact.id,
+            name: cc.contact.name,
+            phone: cc.contact.phone,
+            neighborhood: cc.contact.neighborhood,
+            customFields: cc.contact.customFields,
+            status: lastCall ? lastCall.final_classification : 'PENDING',
+            lastContactedAt: lastCall ? lastCall.createdAt : null,
+            assignedAt: cc.assignedAt
+        };
+    });
+};
+

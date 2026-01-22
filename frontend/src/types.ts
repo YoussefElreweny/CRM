@@ -15,6 +15,7 @@ export interface User {
 export interface Campaign {
   id: string;
   name: string;
+  description?: string;
   status: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'DRAFT';
   createdAt: string;
   successRate: number;

@@ -41,3 +41,8 @@ export const getCampaignStats = async (id: string): Promise<CampaignStats> => {
     const response = await apiClient.get(`/api/campaigns/${id}/stats`);
     return response.data.data.stats;
 };
+
+export const getCampaignContacts = async (id: string): Promise<any[]> => {
+    const response = await apiClient.get(`/api/campaigns/${id}/contacts`);
+    return response.data.data.contacts;
+};

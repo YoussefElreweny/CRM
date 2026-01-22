@@ -65,7 +65,7 @@ const QAReviewCalls: React.FC = () => {
                 ) : (
                     <div className="space-y-4">
                         {calls.map(call => (
-                            <div key={call.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div key={call.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
                                         <h3 className="font-semibold text-gray-800">{call.campaign.name}</h3>
@@ -77,7 +77,33 @@ const QAReviewCalls: React.FC = () => {
                                     </span>
                                 </div>
 
-                                <div className="flex gap-2 flex-wrap">
+                                <div className="mb-4 space-y-3">
+                                    {call.ai_notes && (
+                                        <div className="bg-yellow-50 p-3 rounded text-sm text-yellow-800 border border-yellow-100">
+                                            <strong>AI Notes:</strong> {call.ai_notes}
+                                        </div>
+                                    )}
+
+                                    {call.audio_url && (
+                                        <div className="w-full">
+                                            <audio controls className="w-full h-8">
+                                                <source src={call.audio_url} type="audio/mpeg" />
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        </div>
+                                    )}
+
+                                    {call.transcript_text && (
+                                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                                            <p className="text-xs font-semibold text-gray-500 mb-1">Transcript:</p>
+                                            <div className="text-sm text-gray-700 max-h-40 overflow-y-auto whitespace-pre-wrap">
+                                                {call.transcript_text}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-2 flex-wrap border-t border-gray-100 pt-3">
                                     <button
                                         onClick={() => handleReview(call.id, 'QUALIFIED')}
                                         disabled={submitting === call.id}

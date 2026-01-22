@@ -95,3 +95,18 @@ export const getCampaignStats = catchAsync(async (req: Request, res: Response, n
         data: { stats }
     });
 });
+
+// Get campaign contacts
+export const getCampaignContacts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+    const userRole = (req as any).user.role;
+
+    const contacts = await campaignsService.getCampaignContacts(id, userId, userRole);
+
+    res.status(200).json({
+        status: 'success',
+        results: contacts.length,
+        data: { contacts }
+    });
+});

@@ -23,4 +23,8 @@ router
     .route('/:id/stats')
     .get(campaignsController.getCampaignStats);
 
+router
+    .route('/:id/contacts')
+    .get(campaignsController.getCampaignContacts);
+
 export default router;
